@@ -1,0 +1,29 @@
+{
+  "name": "parcel-parser",
+  "version": "1.0.0",
+  "description": "A small test script in node.js to read in parcels from a CSV and filter them based on a given date, then do some minor processing.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/B-0-B-B-Y/parcel-parser.git"
+  },
+  "keywords": [
+    "node.js",
+    "dpd",
+    "test",
+    "parcels",
+    "processing",
+    "csv",
+    "filter",
+    "date"
+  ],
+  "author": "Bob Naydenov",
+  "license": "GPL-3.0",
+  "bugs": {
+    "url": "https://github.com/B-0-B-B-Y/parcel-parser/issues"
+  },
+  "homepage": "https://github.com/B-0-B-B-Y/parcel-parser#readme"
+}
