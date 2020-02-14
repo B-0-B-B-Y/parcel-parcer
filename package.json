@@ -25,5 +25,8 @@
   "bugs": {
     "url": "https://github.com/B-0-B-B-Y/parcel-parser/issues"
   },
-  "homepage": "https://github.com/B-0-B-B-Y/parcel-parser#readme"
+  "homepage": "https://github.com/B-0-B-B-Y/parcel-parser#readme",
+  "dependencies": {
+    "csvtojson": "^2.0.10"
+  }
 }
