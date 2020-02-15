@@ -35,6 +35,10 @@ const sortParcels = async (filteredParcels) => {
         }
     }
 
+    const sortedBHParcels = birminghamParcels.sort((a, b) => (a.route > b.route) ? 1 : -1)
+
+    console.log(sortedBHParcels)
+
     return { birminghamParcels, leedsParcels, wakefieldParcels }
 }
 
@@ -49,7 +53,7 @@ const processCSV = (filepath) => {
         return sortParcels(filteredParcels)
     })
     .then((sortedParcels) => {
-        console.log(sortedParcels)
+        // console.log(sortedParcels)
     })
 }
 
