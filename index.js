@@ -1,6 +1,7 @@
 const fs = require('fs')
 const csv = require('csvtojson')
 const axios = require('axios')
+const _ = require('underscore')
 const args = process.argv.slice(2)
 const [ filepath, dateFilter ] = args
 const birminghamCodes = [/B\d/, /TF/, /DY/, /WV/]
@@ -35,11 +36,11 @@ const sortParcels = async (filteredParcels) => {
         }
     }
 
-    const sortedBHParcels = birminghamParcels.sort((a, b) => (a.route > b.route) ? 1 : -1)
+    const sortedBirminghamParcels = _.groupBy(_.sortBy(birminghamParcels, 'eta'), 'route')
+    const sortedLeedsParcels = _.groupBy(_.sortBy(leedsParcels, 'eta'), 'route')
+    const sortedWakefieldParcels = _.groupBy(_.sortBy(wakefieldParcels, 'eta'), 'route')
 
-    console.log(sortedBHParcels)
-
-    return { birminghamParcels, leedsParcels, wakefieldParcels }
+    return { sortedBirminghamParcels, sortedLeedsParcels, sortedWakefieldParcels }
 }
 
 const processCSV = (filepath) => {
@@ -53,7 +54,22 @@ const processCSV = (filepath) => {
         return sortParcels(filteredParcels)
     })
     .then((sortedParcels) => {
-        // console.log(sortedParcels)
+        const outputDir = './output'
+        const locations = Object.keys(sortedParcels)
+        const outputFiles = locations.map(locationName => ({[locationName] : sortedParcels[locationName]}))
+        
+        if (!fs.existsSync(outputDir)) {
+            fs.mkdirSync(outputDir)
+        }
+
+        outputFiles.forEach((location, index) => {
+            fs.writeFile(`${outputDir}/${locations[index]}.json`, JSON.stringify(location, null, 4), (err) => {
+                if (err) {
+                    console.error(err)
+                    process.exit(error.errno)
+                }
+            })
+        })
     })
 }
 

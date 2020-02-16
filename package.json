@@ -28,6 +28,7 @@
   "homepage": "https://github.com/B-0-B-B-Y/parcel-parser#readme",
   "dependencies": {
     "axios": "^0.19.2",
-    "csvtojson": "^2.0.10"
+    "csvtojson": "^2.0.10",
+    "underscore": "^1.9.2"
   }
 }
