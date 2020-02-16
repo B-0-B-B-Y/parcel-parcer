@@ -33,7 +33,7 @@ const API = 'https://us-central1-dpduk-s-test-d1.cloudfunctions.net/parcels'
  * @param [] args
  */
 const validateInput = (args) => {
-    if (args.length != 2) {
+    if (args.length !== 2) {
         console.log("Please supply exactly 2 arguments to the script, like so ---> 'node index.js [filepathToCSV] [dateToFilterOn]'")
         process.exit(-1)
     }
@@ -59,18 +59,16 @@ const fetchDeliveryInformation = async (currentParcel) => {
             case 401:
             case 403:
                 console.error(`${baseErrorMessage}This usually means you aren't authorised to interact with the API. Try verfiying you're using the correct bearer token.`)
-                process.exit(errorCode)
             case 404:
                 console.error(`${baseErrorMessage}This means that the resource you're trying to access cannot be found at the moment. Please verify you're using the correct
                 API endpoint or try again later.`)
-                process.exit(errorCode)
             case 500:
                 console.error(`${baseErrorMessage}This usually refers to an internal server error, so we cannot process the parcels at this time. Please try again later.`)
-                process.exit(errorCode)
             default:
                 console.error(`${baseErrorMessage}`)
-                process.exit(errorCode)
         }
+
+        process.exit(errorCode)
     })
 }
 
@@ -79,25 +77,24 @@ const fetchDeliveryInformation = async (currentParcel) => {
  * which contain parcels for different locations grouped by route code and sorted
  * in ascending order by delivery estimated time
  *
- * @param Object filteredParcels
+ * @param [Objects] filteredParcels
  */
 const sortParcels = async (filteredParcels) => {
     const birminghamParcels = [], leedsParcels = [], wakefieldParcels = []
 
-    for (x = 0; x < filteredParcels.length; x++) {
-        const currentParcel = filteredParcels[x]
-        const postcodeID = currentParcel.postcode.split(' ')[0]
-        const deliveryInformation = await fetchDeliveryInformation(currentParcel)
+    for await(const parcel of filteredParcels) {
+        const postcodeID = parcel.postcode.split(' ')[0]
+        const deliveryInformation = await fetchDeliveryInformation(parcel)
 
-        currentParcel.route = deliveryInformation.route
-        currentParcel.eta = deliveryInformation.eta
+        parcel.route = deliveryInformation.route
+        parcel.eta = deliveryInformation.eta
 
         if (birminghamCodes.some(code => postcodeID.match(code))) {
-            birminghamParcels.push(currentParcel)
+            birminghamParcels.push(parcel)
         } else if (leedsCodes.some(code => postcodeID.match(code))) {
-            leedsParcels.push(currentParcel)
+            leedsParcels.push(parcel)
         } else {
-            wakefieldParcels.push(currentParcel)
+            wakefieldParcels.push(parcel)
         }
     }
 
