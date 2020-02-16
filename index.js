@@ -25,10 +25,16 @@ const birminghamCodes = [/B\d/, /TF/, /DY/, /WV/]
 const leedsCodes = [/WF16/, /BD/, /LS/]
 const API = 'https://us-central1-dpduk-s-test-d1.cloudfunctions.net/parcels'
 
-// Make sure exactly 2 arguments are supplied to the script else terminate script execution
-if (args.length != 2) {
-    console.log("Please supply exactly 2 arguments to the script, like so ---> 'node index.js [filepathToCSV] [dateToFilterOn]'")
-    process.exit(-1)
+/**
+ * Validates the user input from the CLI to make sure exactly 2 arguments are supplied
+ *
+ * @param [] args
+ */
+const validateInput = (args) => {
+    if (args.length != 2) {
+        console.log("Please supply exactly 2 arguments to the script, like so ---> 'node index.js [filepathToCSV] [dateToFilterOn]'")
+        process.exit(-1)
+    }
 }
 
 /**
@@ -104,16 +110,18 @@ const sortParcels = async (filteredParcels) => {
  * This is the main function which runs through all the processes from reading in the CSV file
  * to producing the final output JSON files with all the grouped and sorted parcels. The order
  * of the processes that occur here is:
- * 1) Use csvtojson to read in all parcels from the csv and create the initial JSON object to work with
- * 2) Filter the object to only contain parcels matching the date specified as an argument in the CLI
- * 3) Pass this object to the sorting function sortParcels() which returns the parcels split by
+ * 1) Validate the user input has exactly 2 arguments
+ * 2) Use csvtojson to read in all parcels from the csv and create the initial JSON object to work with
+ * 3) Filter the object to only contain parcels matching the date specified as an argument in the CLI
+ * 4) Pass this object to the sorting function sortParcels() which returns the parcels split by
  *    location, grouped by route number and sorted in an ascending order by delivery ETA
- * 4) Create output directory if it doesn't already exist
- * 5) Write out each location as a json file with all the relevant, ready-sorted parcels
+ * 5) Create output directory if it doesn't already exist
+ * 6) Write out each location as a json file with all the relevant, ready-sorted parcels
  *
  * @param String filepath 
  */
 const processCSV = (filepath) => {
+    validateInput(args)
     csv()
     .fromFile(filepath)
     .then(parcelData => {
@@ -148,7 +156,3 @@ const processCSV = (filepath) => {
 }
 
 processCSV(filepath)
-
-exports.fetchDeliveryInformation = fetchDeliveryInformation
-exports.sortParcels = sortParcels
-exports.processCSV = processCSV
