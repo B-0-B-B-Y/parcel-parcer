@@ -4,7 +4,7 @@
   "description": "A small test script in node.js to read in parcels from a CSV and filter them based on a given date, then do some minor processing.",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "jest tests/index.test.js"
   },
   "repository": {
     "type": "git",

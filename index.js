@@ -23,6 +23,7 @@ const args = process.argv.slice(2)
 const [ filepath, dateFilter ] = args
 const birminghamCodes = [/B\d/, /TF/, /DY/, /WV/]
 const leedsCodes = [/WF16/, /BD/, /LS/]
+const API = 'https://us-central1-dpduk-s-test-d1.cloudfunctions.net/parcels'
 
 // Make sure exactly 2 arguments are supplied to the script else terminate script execution
 if (args.length != 2) {
@@ -31,9 +32,45 @@ if (args.length != 2) {
 }
 
 /**
+ * Retrieves route code and delivery ETA information for a specific parcel by
+ * making a callout to the parcels API using the parcel number and a bearer token
+ *
+ * @param Object currentParcel
+ */
+const fetchDeliveryInformation = async (currentParcel) => {
+    return axios.get(`${API}/${currentParcel.parcel_number}`,
+        { headers: {'Authorization' : `Bearer 04B5BD62-A454-41D0-BEEB-E952D239283E`} //Note: Normally these types of keys would be stored elsewhere for obvious security reasons, such as an .env file
+    }).then(result => {
+        return result.data
+    }).catch(error => {
+        const status = error.response.status
+        const errorCode = error.errno
+        const baseErrorMessage = `The API returned the following status code: ${status}.\n\n`
+
+        switch (status) {
+            case 401:
+            case 403:
+                console.error(`${baseErrorMessage}This usually means you aren't authorised to interact with the API. Try verfiying you're using the correct bearer token.`)
+                process.exit(errorCode)
+            case 404:
+                console.error(`${baseErrorMessage}This means that the resource you're trying to access cannot be found at the moment. Please verify you're using the correct
+                API endpoint or try again later.`)
+                process.exit(errorCode)
+            case 500:
+                console.error(`${baseErrorMessage}This usually refers to an internal server error, so we cannot process the parcels at this time. Please try again later.`)
+                process.exit(errorCode)
+            default:
+                console.error(`${baseErrorMessage}`)
+                process.exit(errorCode)
+        }
+    })
+}
+
+/**
  * This function takes the date filtered parcels and produces a set of objects
  * which contain parcels for different locations grouped by route code and sorted
  * in ascending order by delivery estimated time
+ *
  * @param Object filteredParcels
  */
 const sortParcels = async (filteredParcels) => {
@@ -42,32 +79,7 @@ const sortParcels = async (filteredParcels) => {
     for (x = 0; x < filteredParcels.length; x++) {
         const currentParcel = filteredParcels[x]
         const postcodeID = currentParcel.postcode.split(' ')[0]
-        const deliveryInformation = await axios.get(`https://us-central1-dpduk-s-test-d1.cloudfunctions.net/parcels/${currentParcel.parcel_number}`,
-         { headers: {'Authorization' : `Bearer 04B5BD62-A454-41D0-BEEB-E952D239283E`} //Note: Normally these types of keys would be stored elsewhere for obvious security reasons, such as an .env file
-        }).then(result => {
-            return result.data
-        }).catch(error => {
-            const status = error.response.status
-            const errorCode = error.errno
-            const baseErrorMessage = `The API returned the following status code: ${status}.\n\n`
-
-            switch (status) {
-                case 401:
-                case 403:
-                    console.error(`${baseErrorMessage}This usually means you aren't authorised to interact with the API. Try verfiying you're using the correct bearer token.`)
-                    process.exit(errorCode)
-                case 404:
-                    console.error(`${baseErrorMessage}This means that the resource you're trying to access cannot be found at the moment. Please verify you're using the correct
-                    API endpoint or try again later.`)
-                    process.exit(errorCode)
-                case 500:
-                    console.error(`${baseErrorMessage}This usually refers to an internal server error, so we cannot process the parcels at this time. Please try again later.`)
-                    process.exit(errorCode)
-                default:
-                    console.error(`${baseErrorMessage}`)
-                    process.exit(errorCode)
-            }
-        })
+        const deliveryInformation = await fetchDeliveryInformation(currentParcel)
 
         currentParcel.route = deliveryInformation.route
         currentParcel.eta = deliveryInformation.eta
@@ -98,6 +110,7 @@ const sortParcels = async (filteredParcels) => {
  *    location, grouped by route number and sorted in an ascending order by delivery ETA
  * 4) Create output directory if it doesn't already exist
  * 5) Write out each location as a json file with all the relevant, ready-sorted parcels
+ *
  * @param String filepath 
  */
 const processCSV = (filepath) => {
@@ -120,9 +133,9 @@ const processCSV = (filepath) => {
         }
 
         outputFiles.forEach((location, index) => {
-            fs.writeFile(`${outputDir}/${locations[index]}.json`, JSON.stringify(location, null, 4), (err) => {
-                if (err) {
-                    console.error(err)
+            fs.writeFile(`${outputDir}/${locations[index]}.json`, JSON.stringify(location, null, 4), (error) => {
+                if (error) {
+                    console.error(error)
                     process.exit(error.errno)
                 }
             })
@@ -135,3 +148,7 @@ const processCSV = (filepath) => {
 }
 
 processCSV(filepath)
+
+exports.fetchDeliveryInformation = fetchDeliveryInformation
+exports.sortParcels = sortParcels
+exports.processCSV = processCSV
