@@ -34,7 +34,7 @@ if (args.length != 2) {
  * This function takes the date filtered parcels and produces a set of objects
  * which contain parcels for different locations grouped by route code and sorted
  * in ascending order by delivery estimated time
- * @param Object {parcels filtered by specified date} filteredParcels
+ * @param Object filteredParcels
  */
 const sortParcels = async (filteredParcels) => {
     const birminghamParcels = [], leedsParcels = [], wakefieldParcels = []
@@ -77,7 +77,7 @@ const sortParcels = async (filteredParcels) => {
  *    location, grouped by route number and sorted in an ascending order by delivery ETA
  * 4) Create output directory if it doesn't already exist
  * 5) Write out each location as a json file with all the relevant, ready-sorted parcels
- * @param  filepath 
+ * @param String filepath 
  */
 const processCSV = (filepath) => {
     csv()
