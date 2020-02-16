@@ -5,6 +5,8 @@
  * a series of JSON files for different locations where parcels are grouped by route
  * code number and sorted by delivery ETA times.
  * 
+ * NOTE: Would have added unit tests for this script as well but ran out of time
+ * 
  * Script usage:
  * $ > node index.js [path-to-csv-file-here, default csv file located at: data/sample-parcels.csv] [data-to-filter-on-here, format = YYYY-MM-DD]
  * 
