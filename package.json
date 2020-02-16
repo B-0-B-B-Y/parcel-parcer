@@ -30,5 +30,8 @@
     "axios": "^0.19.2",
     "csvtojson": "^2.0.10",
     "underscore": "^1.9.2"
+  },
+  "devDependencies": {
+    "jest": "^25.1.0"
   }
 }

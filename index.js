@@ -43,9 +43,30 @@ const sortParcels = async (filteredParcels) => {
         const currentParcel = filteredParcels[x]
         const postcodeID = currentParcel.postcode.split(' ')[0]
         const deliveryInformation = await axios.get(`https://us-central1-dpduk-s-test-d1.cloudfunctions.net/parcels/${currentParcel.parcel_number}`,
-         { headers: {'Authorization' : `Bearer 04B5BD62-A454-41D0-BEEB-E952D239283E`} //Note: Normally these types of keys would be stored elsewhere for obvious security reasons
-        }).then((result) => {
+         { headers: {'Authorization' : `Bearer 04B5BD62-A454-41D0-BEEB-E952D239283E`} //Note: Normally these types of keys would be stored elsewhere for obvious security reasons, such as an .env file
+        }).then(result => {
             return result.data
+        }).catch(error => {
+            const status = error.response.status
+            const errorCode = error.errno
+            const baseErrorMessage = `The API returned the following status code: ${status}.\n\n`
+
+            switch (status) {
+                case 401:
+                case 403:
+                    console.error(`${baseErrorMessage}This usually means you aren't authorised to interact with the API. Try verfiying you're using the correct bearer token.`)
+                    process.exit(errorCode)
+                case 404:
+                    console.error(`${baseErrorMessage}This means that the resource you're trying to access cannot be found at the moment. Please verify you're using the correct
+                    API endpoint or try again later.`)
+                    process.exit(errorCode)
+                case 500:
+                    console.error(`${baseErrorMessage}This usually refers to an internal server error, so we cannot process the parcels at this time. Please try again later.`)
+                    process.exit(errorCode)
+                default:
+                    console.error(`${baseErrorMessage}`)
+                    process.exit(errorCode)
+            }
         })
 
         currentParcel.route = deliveryInformation.route
@@ -82,14 +103,14 @@ const sortParcels = async (filteredParcels) => {
 const processCSV = (filepath) => {
     csv()
     .fromFile(filepath)
-    .then((parcelData) => {
+    .then(parcelData => {
         const filteredParcels = parcelData.filter(parcel => {
             return parcel.delivery_date === dateFilter.toString()
         })
 
         return sortParcels(filteredParcels)
     })
-    .then((sortedParcels) => {
+    .then(sortedParcels => {
         const outputDir = './output'
         const locations = Object.keys(sortedParcels)
         const outputFiles = locations.map(locationName => ({[locationName] : sortedParcels[locationName]}))
@@ -106,6 +127,10 @@ const processCSV = (filepath) => {
                 }
             })
         })
+    })
+    .catch(error => {
+        console.error(error.message)
+        process.exit(error.errno)
     })
 }
 
