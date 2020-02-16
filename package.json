@@ -4,7 +4,7 @@
   "description": "A small test script in node.js to read in parcels from a CSV and filter them based on a given date, then do some minor processing.",
   "main": "index.js",
   "scripts": {
-    "test": "jest tests/index.test.js"
+    "test": "echo Test command would go here"
   },
   "repository": {
     "type": "git",
@@ -31,7 +31,5 @@
     "csvtojson": "^2.0.10",
     "underscore": "^1.9.2"
   },
-  "devDependencies": {
-    "jest": "^25.1.0"
-  }
+  "devDependencies": {}
 }
