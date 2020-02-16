@@ -12,5 +12,6 @@ Small node.js script to parse a CSV containing parcel information and filter bas
 
 **Script usage:**
   `$ > node index.js [path-to-csv-file-here, default csv file located at: data/sample-parcels.csv] [data-to-filter-on-here, format = YYYY-MM-DD]`
+  
 **Example usage:**
   `$ > node index.js data/sample-parcels.csv 2019-10-20`
